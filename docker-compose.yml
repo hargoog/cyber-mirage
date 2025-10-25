@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  role1-network:
+    image: alpine:latest
+    container_name: network-role
+    command: sleep 9999
+
+  role2-services:
+    image: python:3.9
+    container_name: services-role
+    command: sleep 9999
+
+  role7-pipeline:
+    image: redis:alpine
+    container_name: redis-role
+    ports:
+      - "6379:6379"
