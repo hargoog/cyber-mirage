@@ -1,18 +1,42 @@
 version: '3.8'
 
 services:
+  # ======= Role 1: شبكات =======
   role1-network:
     image: alpine:latest
     container_name: network-role
     command: sleep 9999
+    networks:
+      - cyber-net
 
+  # ======= Role 2: خدمات وهمية =======
   role2-services:
     image: python:3.9
     container_name: services-role
-    command: sleep 9999
+    command: >
+      sh -c "pip install redis && 
+             python -c '
+import redis, time
+r = redis.Redis(host=\"redis-bus\", port=6379)
+r.set(\"first_message\", \"أول رسالة بين Role 2 و Redis!\")
+print(\"✅ تم إرسال الرسالة الأولى!\")
+time.sleep(9999)
+'"
+    networks:
+      - cyber-net
+    depends_on:
+      - role1-network
+      - redis-bus
 
-  role7-pipeline:
+  # ======= Role 7: خطوط البيانات (إنت) =======
+  redis-bus:
     image: redis:alpine
-    container_name: redis-role
+    container_name: redis-bus
     ports:
       - "6379:6379"
+    networks:
+      - cyber-net
+
+networks:
+  cyber-net:
+    driver: bridge
